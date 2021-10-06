@@ -1,7 +1,8 @@
-#include "utils.hpp"
+#include "benchmark.hpp"
 #include "assembly.hpp"
 #include "operations.hpp"
 #include <iostream>
+#include <iomanip>
 
 int main() {
     int samples = 100;
@@ -10,10 +11,12 @@ int main() {
     int n_elements_min = 1;
     int n_elements_max = 100;
 
+    std::cout << std::fixed << std::setprecision(6);
+
     std::cout << "Sparse matrix update\n";
     std::cout << "Dimension\t" << "CoeffRef\t" << "Triplets\t" << "Transform\t" << "Pointers\t" << "Indices\t" << "\n";
     for(int n_elements = n_elements_min; n_elements <= n_elements_max; n_elements += 1) {
-        std::vector<Element> elements = create_elements(n_dimension, n_elements);
+        std::vector<Element> elements = Element::create_elements(n_dimension, n_elements);
         std::cout << n_dimension*(n_elements + 1)/2 << "\t";
 
         System_CoeffRef system1(elements);

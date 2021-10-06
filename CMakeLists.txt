@@ -13,6 +13,7 @@ find_package(OpenMP REQUIRED)
 add_executable(
     benchmark
     source/main.cpp
+    source/assembly.cpp
 )
 
 target_link_libraries(

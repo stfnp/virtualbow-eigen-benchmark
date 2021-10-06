@@ -4,7 +4,7 @@
 // Executes a function multiple times and returns the average
 // execution time (wall clock time) in milliseconds
 template<typename F>
-double execute_and_measure(F function, int samples) {
+static double execute_and_measure(F function, int samples) {
     using std::chrono::high_resolution_clock;
     using std::chrono::duration;
 
