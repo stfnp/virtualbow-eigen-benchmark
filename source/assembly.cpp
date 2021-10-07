@@ -12,14 +12,14 @@ Element::Element(int dimension, int start_index)
 
 // Generates a random, symmetric, positive definite matrix with dimension n
 // Source: https://math.stackexchange.com/a/358092
-MatrixXd Element::create_matrix(int n) {
-    MatrixXd A = 0.5*(MatrixXd::Random(n, n) + MatrixXd::Identity(n, n));    // Matrix with elements in [0, 1]
-    return 0.5*(A.transpose() + A) + n*MatrixXd::Identity(n, n);    // Construct symmetry and diagonal dominance
+DenseMatrix Element::create_matrix(int n) {
+    DenseMatrix A = 0.5*(DenseMatrix::Random(n, n) + DenseMatrix::Identity(n, n));    // Matrix with elements in [0, 1]
+    return 0.5*(A.transpose() + A) + n*DenseMatrix::Identity(n, n);    // Construct symmetry and diagonal dominance
 }
 
 // Generates an ascending list of indices with size 'dimension', starting with start_index
-VectorXi Element::create_indices(int dimension, int start_index) {
-    return VectorXi::LinSpaced(dimension, start_index, start_index + dimension - 1);
+IndexVector Element::create_indices(int dimension, int start_index) {
+    return IndexVector::LinSpaced(dimension, start_index, start_index + dimension - 1);
 }
 
 std::vector<Element> Element::create_elements(int dimension, int n_elements) {
@@ -41,10 +41,10 @@ System_CoeffRef::System_CoeffRef(const std::vector<Element>& elements)
     }
 
     // Initialize matrix
-    this->matrix = SparseMatrix<double>(max_index + 1, max_index + 1);
+    this->matrix = SparseMatrix(max_index + 1, max_index + 1);
 }
 
-const SparseMatrix<double>& System_CoeffRef::assemble() {
+const SparseMatrix& System_CoeffRef::assemble() {
     matrix.coeffs().setZero();    // Faster than matrix.setZero(), but matrix needs to be compressed (see makeCompressed() below)
     for(auto& e: elements) {
         for(int i = 0; i < e.matrix.rows(); ++i) {
@@ -67,10 +67,10 @@ System_Triplets::System_Triplets(const std::vector<Element>& elements)
     }
 
     // Initialize matrix
-    matrix = SparseMatrix<double>(max_index + 1, max_index + 1);
+    matrix = SparseMatrix(max_index + 1, max_index + 1);
 }
 
-const SparseMatrix<double>& System_Triplets::assemble() {
+const SparseMatrix& System_Triplets::assemble() {
     triplets.clear();
     for(auto& e: elements) {
         for(int i = 0; i < e.matrix.rows(); ++i) {
@@ -93,12 +93,12 @@ System_Transform::System_Transform(const std::vector<Element>& elements)
     }
 
     // Initialize matrix
-    this->matrix = SparseMatrix<double>(max_index + 1, max_index + 1);
+    this->matrix = SparseMatrix(max_index + 1, max_index + 1);
 
     // Initialize transforms
     for(auto& e: elements) {
-        SparseMatrix<double> transform(max_index + 1, e.indices.size());    // Global dimension x element dimension
-        SparseMatrix<double> transform_t(e.indices.size(), max_index + 1);    // Element dimension x global dimension
+        SparseMatrix transform(max_index + 1, e.indices.size());    // Global dimension x element dimension
+        SparseMatrix transform_t(e.indices.size(), max_index + 1);    // Element dimension x global dimension
 
         for(int i = 0; i < e.indices.size(); ++i) {
             int j = e.indices(i);
@@ -110,9 +110,9 @@ System_Transform::System_Transform(const std::vector<Element>& elements)
     }
 }
 
-const SparseMatrix<double>& System_Transform::assemble() {
+const SparseMatrix& System_Transform::assemble() {
     matrix.coeffs().setZero();
-    SparseMatrix<double> temp;
+    SparseMatrix temp;
     for(int i = 0; i < elements.size(); ++i) {
         temp = elements[i].matrix.sparseView();    // TODO: Write without this
         matrix += transforms[i] * temp * transforms_t[i];
@@ -130,7 +130,7 @@ System_Pointers::System_Pointers(const std::vector<Element>& elements)
     }
 
     // Initialize sparsity pattern with zeros
-    std::vector<Triplet<double>> triplets;
+    std::vector<Triplet> triplets;
     for(auto& e: elements) {
         for(int i = 0; i < e.matrix.rows(); ++i) {
             for(int j = 0; j < e.matrix.cols(); ++j) {
@@ -138,12 +138,12 @@ System_Pointers::System_Pointers(const std::vector<Element>& elements)
             }
         }
     }
-    matrix = SparseMatrix<double>(max_index + 1, max_index + 1);
+    matrix = SparseMatrix(max_index + 1, max_index + 1);
     matrix.setFromTriplets(triplets.begin(), triplets.end());
 
     // Store coefficient references
     for(auto& e: elements) {
-        std::vector<double*> p;
+        std::vector<Real*> p;
         for(int i = 0; i < e.matrix.rows(); ++i) {
             for(int j = 0; j < e.matrix.cols(); ++j) {
                 p.push_back(&matrix.coeffRef(e.indices(i), e.indices(j)));
@@ -153,7 +153,7 @@ System_Pointers::System_Pointers(const std::vector<Element>& elements)
     }
 }
 
-const SparseMatrix<double>& System_Pointers::assemble() {
+const SparseMatrix& System_Pointers::assemble() {
     matrix.coeffs().setZero();
     for(size_t k = 0; k < elements.size(); ++k) {
         auto& e = elements[k];
@@ -177,7 +177,7 @@ System_Indices::System_Indices(const std::vector<Element>& elements)
     }
 
     // Initialize sparsity pattern with zeros
-    std::vector<Triplet<double>> triplets;
+    std::vector<Triplet> triplets;
     for(auto& e: elements) {
         for(int i = 0; i < e.matrix.rows(); ++i) {
             for(int j = 0; j < e.matrix.cols(); ++j) {
@@ -185,12 +185,12 @@ System_Indices::System_Indices(const std::vector<Element>& elements)
             }
         }
     }
-    matrix = SparseMatrix<double>(max_index + 1, max_index + 1);
+    matrix = SparseMatrix(max_index + 1, max_index + 1);
     matrix.setFromTriplets(triplets.begin(), triplets.end());
 
     // Initialize coefficient indices
     for(auto& e: elements) {
-        VectorXi element_indices(e.matrix.size());
+        IndexVector element_indices(e.matrix.size());
         int k = 0;
         for(int i = 0; i < e.matrix.rows(); ++i) {
             for(int j = 0; j < e.matrix.cols(); ++j) {
@@ -202,7 +202,7 @@ System_Indices::System_Indices(const std::vector<Element>& elements)
     }
 }
 
-const SparseMatrix<double>& System_Indices::assemble() {
+const SparseMatrix& System_Indices::assemble() {
     matrix.coeffs().setZero();
     for(size_t i = 0; i < elements.size(); ++i) {
         matrix.coeffs()(indices[i]) += elements[i].matrix.array().reshaped();
@@ -214,7 +214,7 @@ const SparseMatrix<double>& System_Indices::assemble() {
     return matrix;
 }
 
-long System_Indices::coeffIndex(const SparseMatrix<double>& matrix, int row, int col) {
+long System_Indices::coeffIndex(const SparseMatrix& matrix, int row, int col) {
     int start = matrix.outerIndexPtr()[row];
     int end = matrix.outerIndexPtr()[row + 1];
     long i = matrix.data().searchLowerIndex(start, end - 1, col);

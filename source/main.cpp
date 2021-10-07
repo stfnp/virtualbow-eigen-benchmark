@@ -44,11 +44,11 @@ int main() {
 
         for(int t = 1; t <= 4; ++t) {
             Eigen::setNbThreads(t);
-            std::cout << matrix_vector_multiplication<MatrixXd>(n_elements, n_dimension, samples) << "\t";
+            std::cout << matrix_vector_multiplication<DenseMatrix>(n_elements, n_dimension, samples) << "\t";
         }
 
         Eigen::setNbThreads(1);
-        std::cout << matrix_vector_multiplication<SparseMatrix<double>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << matrix_vector_multiplication<SparseMatrix>(n_elements, n_dimension, samples) << "\t";
         std::cout << std::endl;
     }
     std::cout << "\n";
@@ -60,11 +60,11 @@ int main() {
 
         for(int t = 1; t <= 4; ++t) {
             Eigen::setNbThreads(t);
-            std::cout << matrix_matrix_multiplication<MatrixXd>(n_elements, n_dimension, samples) << "\t";
+            std::cout << matrix_matrix_multiplication<DenseMatrix>(n_elements, n_dimension, samples) << "\t";
         }
 
         Eigen::setNbThreads(1);
-        std::cout << matrix_matrix_multiplication<SparseMatrix<double>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << matrix_matrix_multiplication<SparseMatrix>(n_elements, n_dimension, samples) << "\t";
         std::cout << std::endl;
     }
     std::cout << "\n";
@@ -76,19 +76,19 @@ int main() {
         std::cout << n_dimension*(n_elements + 1)/2 << "\t";
         // Dense decompositions, http://eigen.tuxfamily.org/dox/group__TopicLinearAlgebraDecompositions.html
         // Sparse decompositions, http://eigen.tuxfamily.org/dox/group__TopicSparseSystems.html
-        std::cout << solve_linear_system<MatrixXd, Eigen::PartialPivLU<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<MatrixXd, Eigen::FullPivLU<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<MatrixXd, Eigen::HouseholderQR<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<MatrixXd, Eigen::CompleteOrthogonalDecomposition<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<MatrixXd, Eigen::LLT<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<MatrixXd, Eigen::LDLT<MatrixXd>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::SimplicialLLT<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::SimplicialLDLT<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::SparseLU<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
-        //std::cout << solve_linear_system<SparseMatrix<double>, Eigen::SparseQR<SparseMatrix<double>, Eigen::COLAMDOrdering<int>>>(n_elements, n_dimension, samples);    // Crashes for some reason
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::ConjugateGradient<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::LeastSquaresConjugateGradient<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
-        std::cout << solve_linear_system<SparseMatrix<double>, Eigen::BiCGSTAB<SparseMatrix<double>>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::PartialPivLU<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::FullPivLU<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::HouseholderQR<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::CompleteOrthogonalDecomposition<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::LLT<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<DenseMatrix, Eigen::LDLT<DenseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<SparseMatrix, Eigen::SimplicialLLT<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<SparseMatrix, Eigen::SimplicialLDLT<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<SparseMatrix, Eigen::SparseLU<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        //std::cout << solve_linear_system<SparseMatrix, Eigen::SparseQR<SparseMatrix, Eigen::COLAMDOrdering<int>>>(n_elements, n_dimension, samples);    // Crashes for some reason
+        std::cout << solve_linear_system<SparseMatrix, Eigen::ConjugateGradient<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<SparseMatrix, Eigen::LeastSquaresConjugateGradient<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
+        std::cout << solve_linear_system<SparseMatrix, Eigen::BiCGSTAB<SparseMatrix>>(n_elements, n_dimension, samples) << "\t";
         std::cout << std::endl;
     }
 }
